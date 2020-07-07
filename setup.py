@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="Alex Riina",
     author_email="alex.riina@gmail.com",
-    description="Utility package for interacting with the Anki database",
+    description="Clean python interface for interacting with Anki's database",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=['anki_sqlalchemy'],

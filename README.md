@@ -7,6 +7,7 @@ Here is a small code snippet written first without `anki_sqlalchemy` to show
 how unintuivite the data format and columns names are without an wrapper.
 
 ```python
+# plain python without anki-sqlalchemy
 import sqlite3
 
 conn = sqlite3.connect('backup.db')
@@ -22,6 +23,7 @@ card[1]  # 2
 ```
 
 ```python
+# with anki-sqlalchemy
 import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
