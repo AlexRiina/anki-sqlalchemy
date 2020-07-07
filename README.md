@@ -42,10 +42,15 @@ card.modification_time  # datetime.datetime(2019, 11, 5, 22, 23, 3)
 card.type  # <CardType.due: 2>
 ```
 
-Anki SQLAlchemy also plays nicely with types!
+Anki SQLAlchemy also plays nicely with types too.
 
 ```python
+card: Card = session.query(Card).first()
+reveal_type(card.modification_time)
+# Revealed type is 'datetime.datetime*'
 
+reveal_type(card.note.tags)
+# Revealed type is 'builtins.list*[builtins.str]'
 ```
 
 # BEWARE!
