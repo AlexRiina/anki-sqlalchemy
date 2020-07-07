@@ -12,6 +12,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=['anki_sqlalchemy'],
+    package_data={
+        "": ["py.typed"],
+    },
     install_requires=['sqlalchemy'],
     test_requires=['black', 'isort', 'flake8', 'mypy', 'sqlalchemy-stubs'],
     classifiers=[

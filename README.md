@@ -39,3 +39,15 @@ card = note.cards[0]
 card.modification_time  # datetime.datetime(2019, 11, 5, 22, 23, 3)
 card.type  # <CardType.due: 2>
 ```
+
+Anki SQLAlchemy also plays nicely with types!
+
+```python
+
+```
+
+# BEWARE!
+
+This package can be used to make changes to your anki database. Before
+proceeding, please make a backup of your database file. You don't want to lose
+all your work with a bad query.
