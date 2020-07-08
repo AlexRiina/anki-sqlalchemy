@@ -1,3 +1,5 @@
+[![PyPi Version](https://img.shields.io/pypi/v/anki_sqlalchemy.svg)](https://pypi.python.org/pypi/anki_sqlalchemy/)
+
 Anki SQLAlchemy is an interface for interacting with the
 [Anki](https://apps.ankiweb.net/) sqlite database from python without having to
 either hack an Anki install or figure out the database structure and field
@@ -58,3 +60,9 @@ reveal_type(card.note.tags)
 This package can be used to make changes to your anki database. Before
 proceeding, please make a backup of your database file. You don't want to lose
 all your work with a bad query.
+
+# Install
+
+```
+pip install anki_sqlalchemy
+```
