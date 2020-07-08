@@ -1,8 +1,6 @@
-name: Publish to PyPI
- 
-on:
-  release:
-    types: [published]
+name: Publish test to PyPI
+
+on: push
 
 jobs:
   build-n-publish:
@@ -27,8 +25,9 @@ jobs:
       run: >-
         python setup.py sdist bdist_wheel
 
-    - name: Publish package to PyPI
+    - name: Publish package to TestPyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
-        password: ${{ secrets.pypi_password }}
+        password: ${{ secrets.test_pypi_password }}
+        repository_url: https://test.pypi.org/legacy/
