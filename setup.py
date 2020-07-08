@@ -5,12 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="anki-sqlalchemy",
-    version="0.1.1",
+    version="0.1.2",
     author="Alex Riina",
     author_email="alex.riina@gmail.com",
     description="Clean python interface for interacting with Anki's database",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    url="https://github.com/AlexRiina/anki-sqlalchemy",
     packages=['anki_sqlalchemy'],
     package_data={
         "": ["py.typed"],

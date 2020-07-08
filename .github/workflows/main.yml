@@ -1,12 +1,13 @@
 name: Publish to PyPI
  
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - master
 
 jobs:
   build-n-publish:
-    name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+    name: Build and publish packages
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
@@ -28,6 +29,7 @@ jobs:
         python setup.py sdist bdist_wheel
 
     - name: Publish package to PyPI
+      if: ${{ github.event_name == 'push' }}
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
