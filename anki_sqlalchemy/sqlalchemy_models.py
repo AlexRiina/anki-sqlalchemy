@@ -142,6 +142,8 @@ class Note(Base):
 
     id = Column(Integer, primary_key=True)
     guid = Column(Text, nullable=False)
+    # note that while this is an integer, it is often used as a string in code,
+    # e.g. in Collect.models
     model_id = Column("mid", Integer, nullable=False)
     modification_time = Column("mod", sqlalchemy_fields.EpochTimeStamp, nullable=False)
     update_sequence_number = Column("usn", Integer, nullable=False, index=True)
