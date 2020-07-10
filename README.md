@@ -29,7 +29,7 @@ card[1]  # 2
 import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from anki_sqlalchemy.sqlalchemy_models import Card
+from anki_sqlalchemy import Card
 
 engine = create_engine("sqlite:///backup.db", echo=True)
 Session = sessionmaker(bind=engine)
