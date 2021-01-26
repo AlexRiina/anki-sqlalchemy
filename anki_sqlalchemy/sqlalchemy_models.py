@@ -47,23 +47,31 @@ class GraveType(enum.IntEnum):
 
 
 @enum.unique
-class ReviewwType(enum.IntEnum):
+class ReviewType(enum.IntEnum):
     learn = 0
     review = 1
     relearn = 2
     cram = 3
 
 
-class Card(Base):
+class _UndoableMixin:
+    update_sequence_number = Column("usn", Integer, nullable=False, index=True)
+    modification_time = Column("mtime_secs", sqlalchemy_fields.EpochTimeStamp, nullable=False)
+
+
+class _OldUndoableMixin:
+    update_sequence_number = Column("usn", Integer, nullable=False, index=True)
+    modification_time = Column("mod", sqlalchemy_fields.EpochTimeStamp, nullable=False)
+
+
+class Card(_OldUndoableMixin, Base):
     __tablename__ = "cards"
     __table_args__ = (Index("ix_cards_sched", "did", "queue", "due"),)
 
     id = Column(Integer, primary_key=True)
     note_id = Column("nid", Integer, ForeignKey("notes.id"), nullable=False, index=True)
-    deck_id = Column("did", Integer, nullable=False)
+    deck_id = Column("did", Integer, ForeignKey("decks.id"), nullable=False)
     ordinal = Column("ord", Integer, nullable=False)
-    modification_time = Column("mod", sqlalchemy_fields.EpochTimeStamp, nullable=False)
-    update_sequence_number = Column("usn", Integer, nullable=False, index=True)
     type = Column(
         sqlalchemy_fields.IntEnum[CardType](CardType),
         nullable=False,
@@ -98,7 +106,9 @@ class Card(Base):
     )
     data = Column(Text, nullable=False)  # unused
 
+    deck = relationship("Deck")
     note = relationship("Note")
+    reviews = relationship("RevLog", uselist=True, order_by="RevLog.timestamp")
 
     @hybrid_property
     def burried(self):
@@ -116,11 +126,27 @@ class Collection(Base):
     dty = Column(Integer, nullable=False)
     usn = Column(Integer, nullable=False)
     ls = Column(Integer, nullable=False)
-    conf = Column(sqlalchemy_fields.Json, nullable=False)
-    models = Column(sqlalchemy_fields.Json, nullable=False)
-    decks = Column(Text, nullable=False)
-    dconf = Column(Text, nullable=False)
-    tags = Column(Text, nullable=False)
+
+    # deprecated and moved to their own tables
+    # conf = Column(sqlalchemy_fields.Json, nullable=False)
+    # models = Column(sqlalchemy_fields.Json, nullable=False)
+    # decks = Column(sqlalchemy_fields.Json, nullable=False)
+    # dconf = Column(Text, nullable=False)
+    # tags = Column(Text, nullable=False)
+
+
+class NoteType(_UndoableMixin, Base):
+    __tablename__ = "notetypes"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Text, nullable=False)
+    config = Column(Text, nullable=False)
+
+    notes = relationship("Note", uselist=True)
+    fields = relationship("Field", uselist=True)
+
+    def __repr__(self):
+        return f"<{self.name}: {self.id}>"
 
 
 class Grave(Base):
@@ -137,16 +163,14 @@ class Grave(Base):
     update_sequence_number = Column("usn", Integer, nullable=False)
 
 
-class Note(Base):
+class Note(_OldUndoableMixin, Base):
     __tablename__ = "notes"
 
     id = Column(Integer, primary_key=True)
     guid = Column(Text, nullable=False)
     # note that while this is an integer, it is often used as a string in code,
     # e.g. in Collect.models
-    model_id = Column("mid", Integer, nullable=False)
-    modification_time = Column("mod", sqlalchemy_fields.EpochTimeStamp, nullable=False)
-    update_sequence_number = Column("usn", Integer, nullable=False, index=True)
+    note_type_id = Column("mid", Integer, ForeignKey("notetypes.id"), nullable=False)
 
     tags = Column(sqlalchemy_fields.SpaceList, nullable=False)
     fields = Column("flds", sqlalchemy_fields.FieldList, nullable=False)
@@ -156,17 +180,98 @@ class Note(Base):
     data = Column(Text, nullable=False)  # unused
 
     cards = relationship("Card", uselist=True)
+    note_type = relationship("NoteType")
 
 
 class RevLog(Base):
     __tablename__ = "revlog"
 
     id = Column(Integer, primary_key=True)
-    cid = Column("cid", Integer, nullable=False, index=True)
-    usn = Column("usn", Integer, nullable=False, index=True)
+    timestamp = Column('timestamp', sqlalchemy_fields.MilisecondEpochTimeStamp, primary_key=True)
+    card_id = Column("cid", Integer, ForeignKey("cards.id"), nullable=False, index=True)
+    update_sequence_number = Column("usn", Integer, nullable=False, index=True)
     ease = Column(Integer, nullable=False)
-    ivl = Column("ivl", Integer, nullable=False)
-    lastIvl = Column("lastIvl", Integer, nullable=False)
+    interval = Column("ivl", Integer, nullable=False)
+    last_interval = Column("lastIvl", Integer, nullable=False)
     factor = Column(Integer, nullable=False)
     time = Column(Integer, nullable=False)  # milliseconds
-    type = Column(Integer, nullable=False)
+    type = Column(
+        sqlalchemy_fields.IntEnum[ReviewType](ReviewType),
+        nullable=False,
+    )
+
+    card = relationship("Card")
+
+
+class Field(Base):
+    __tablename__ = "fields"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Text, nullable=False)
+    note_type_id = Column("ntid", Integer, ForeignKey("notetypes.id"), nullable=False, index=True)
+    config = Column(Text, nullable=False)
+    ordinal = Column("ord", Integer, nullable=False)
+
+    note_type = relationship("NoteType")
+
+    def __repr__(self):
+        return f"<{self.name}: {self.id}>"
+
+
+class Template(_UndoableMixin, Base):
+    __tablename__ = "templates"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Text, nullable=False)
+    note_type_id = Column("ntid", Integer, ForeignKey("notetypes.id"), nullable=False, index=True)
+    ordinal = Column("ord", Integer, nullable=False)
+    config = Column(Text, nullable=False)
+
+    note_type = relationship("NoteType")
+
+    def __repr__(self):
+        return f"<{self.name}: {self.id}>"
+
+
+class Deck(_UndoableMixin, Base):
+    __tablename__ = "decks"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Text, nullable=False)
+    common = Column()
+    kind = Column()
+
+    def __repr__(self):
+        return f"<{self.name}: {self.id}>"
+
+
+
+class DeckConfig(_UndoableMixin, Base):
+    __tablename__ = "deck_config"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Text, nullable=False)
+    config = Column(Text, nullable=False)
+
+    def __repr__(self):
+        return f"<{self.name}: {self.id}>"
+
+
+class Config(_UndoableMixin, Base):
+    __tablename__ = "config"
+
+    key = Column(Text, primary_key=True)
+    value = Column('val', sqlalchemy_fields.Json, nullable=False)
+
+    def __repr__(self):
+        return f"<{self.key}>"
+
+
+class Tag(_UndoableMixin, Base):
+    __tablename__ = "tag"
+
+    tag = Column(Text, primary_key=True)
+    update_sequence_number = Column('usn', sqlalchemy_fields.Json, nullable=False)
+
+    def __repr__(self):
+        return f"<{self.tag}>"
