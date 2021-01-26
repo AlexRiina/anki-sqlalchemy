@@ -108,7 +108,7 @@ class Card(_OldUndoableMixin, Base):
 
     deck = relationship("Deck")
     note = relationship("Note")
-    reviews = relationship("RevLog", uselist=True, order_by="RevLog.timestamp")
+    reviews = relationship("RevLog", uselist=True, order_by="RevLog.update_sequence_number")
 
     @hybrid_property
     def burried(self):
@@ -186,8 +186,7 @@ class Note(_OldUndoableMixin, Base):
 class RevLog(Base):
     __tablename__ = "revlog"
 
-    id = Column(Integer, primary_key=True)
-    timestamp = Column('timestamp', sqlalchemy_fields.MilisecondEpochTimeStamp, primary_key=True)
+    id = Column("id", sqlalchemy_fields.MilisecondEpochTimeStamp, primary_key=True)
     card_id = Column("cid", Integer, ForeignKey("cards.id"), nullable=False, index=True)
     update_sequence_number = Column("usn", Integer, nullable=False, index=True)
     ease = Column(Integer, nullable=False)
