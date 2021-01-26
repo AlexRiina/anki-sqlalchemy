@@ -5,6 +5,9 @@ Anki SQLAlchemy is an interface for interacting with the
 either hack an Anki install or figure out the database structure and field
 serialization from scratch.
 
+The goal of this project is not to support every version of Anki entirely. The
+current version supports at a signficant amount of the Anki 2.1.38.
+
 Here is a small code snippet written first without `anki_sqlalchemy` to show
 how unintuivite the data format and columns names are without an wrapper.
 
@@ -60,6 +63,8 @@ reveal_type(card.note.tags)
 This package can be used to make changes to your anki database. Before
 proceeding, please make a backup of your database file. You don't want to lose
 all your work with a bad query.
+
+The Anki database typically lives in a `collection.anki2` file.
 
 # Install
 
