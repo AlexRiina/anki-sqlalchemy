@@ -158,7 +158,7 @@ class NoteType(_UndoableMixin, Base):
     __tablename__ = "notetypes"
 
     id = Column(Integer, primary_key=True)
-    name = Column(Text, nullable=False)
+    name = Column("name", Text, nullable=False)
     config = Column(Text, nullable=False)
 
     notes = relationship("Note", uselist=True)
@@ -224,16 +224,17 @@ class RevLog(_TimestampIdMixin, Base):
 class Field(Base):
     __tablename__ = "fields"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(Text, nullable=False)
-    note_type_id = Column("ntid", Integer, ForeignKey("notetypes.id"), nullable=False, index=True)
+    # NOTE: these are not real primary keys, but there is a unique constraint
+    # and sqlalchemy has trouble with tables that don't have primary keys
+    note_type_id = Column("ntid", Integer, ForeignKey("notetypes.id"), nullable=False, index=True, primary_key=True)
+    name = Column(Text, nullable=False, primary_key=True)
     config = Column(Text, nullable=False)
     ordinal = Column("ord", Integer, nullable=False)
 
     note_type = relationship("NoteType")
 
     def __repr__(self):
-        return f"<{self.name}: {self.id}>"
+        return f"<{self.name}: {self.note_type_id}>"
 
 
 class Template(_UndoableMixin, Base):
@@ -258,6 +259,8 @@ class Deck(_UndoableMixin, Base):
     name = Column(Text, nullable=False)
     common = Column()
     kind = Column()
+
+    cards = relationship("Card", uselist=True)
 
     def __repr__(self):
         return f"<{self.name}: {self.id}>"
@@ -285,11 +288,11 @@ class Config(_UndoableMixin, Base):
         return f"<{self.key}>"
 
 
-class Tag(_UndoableMixin, Base):
-    __tablename__ = "tag"
+class Tag(Base):
+    __tablename__ = "tags"
 
     tag = Column(Text, primary_key=True)
-    update_sequence_number = Column('usn', sqlalchemy_fields.Json, nullable=False)
+    update_sequence_number = Column("usn", Integer, nullable=False)
 
     def __repr__(self):
         return f"<{self.tag}>"
