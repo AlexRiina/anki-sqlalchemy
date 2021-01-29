@@ -14,4 +14,5 @@ from .sqlalchemy_models import (
     RevLog,
     ReviewType,
     Tag,
+    Template,
 )
