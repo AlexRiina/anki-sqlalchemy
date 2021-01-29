@@ -118,8 +118,20 @@ class Card(_OldUndoableMixin, _TimestampIdMixin, Base):
     reviews = relationship("RevLog", uselist=True, order_by="RevLog.update_sequence_number")
 
     @hybrid_property
-    def burried(self):
+    def is_burried(self):
         return self.queue == QueueType.burried
+
+    @hybrid_property
+    def is_review(self):
+        return self.queue == QueueType.due
+
+    @hybrid_property
+    def is_mature(self):
+        return self.is_review and self.interval >= 21
+
+    @hybrid_property
+    def is_young(self):
+        return self.is_review and self.interval < 21
 
 
 class Collection(Base):
