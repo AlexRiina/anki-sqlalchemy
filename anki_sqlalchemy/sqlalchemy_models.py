@@ -1,3 +1,4 @@
+import datetime
 import enum
 
 from sqlalchemy import Column, ForeignKey, Index, Integer, Text
@@ -64,7 +65,13 @@ class _OldUndoableMixin:
     modification_time = Column("mod", sqlalchemy_fields.EpochTimeStamp, nullable=False)
 
 
-class Card(_OldUndoableMixin, Base):
+class _TimestampIdMixin:
+    @hybrid_property
+    def creation_time(self):
+        return datetime.datetime.fromtimestamp(self.id / 1000)
+
+
+class Card(_OldUndoableMixin, _TimestampIdMixin, Base):
     __tablename__ = "cards"
     __table_args__ = (Index("ix_cards_sched", "did", "queue", "due"),)
 
@@ -163,7 +170,7 @@ class Grave(Base):
     update_sequence_number = Column("usn", Integer, nullable=False)
 
 
-class Note(_OldUndoableMixin, Base):
+class Note(_OldUndoableMixin, _TimestampIdMixin, Base):
     __tablename__ = "notes"
 
     id = Column(Integer, primary_key=True)
@@ -183,10 +190,10 @@ class Note(_OldUndoableMixin, Base):
     note_type = relationship("NoteType")
 
 
-class RevLog(Base):
+class RevLog(_TimestampIdMixin, Base):
     __tablename__ = "revlog"
 
-    id = Column("id", sqlalchemy_fields.MilisecondEpochTimeStamp, primary_key=True)
+    id = Column(Integer, primary_key=True)
     card_id = Column("cid", Integer, ForeignKey("cards.id"), nullable=False, index=True)
     update_sequence_number = Column("usn", Integer, nullable=False, index=True)
     ease = Column(Integer, nullable=False)
