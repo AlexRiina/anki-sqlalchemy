@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="anki-sqlalchemy",
-    version="0.1.6",
+    version="0.2.6",
     author="Alex Riina",
     author_email="alex.riina@gmail.com",
     description="Clean python interface for interacting with Anki's database",
