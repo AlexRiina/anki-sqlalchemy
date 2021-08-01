@@ -168,6 +168,7 @@ class NoteType(_UndoableMixin, Base):
 
     notes = relationship("Note", uselist=True)
     fields = relationship("Field", uselist=True)
+    template = relationship("Template", uselist=True)
 
     def __repr__(self):
         return f"<{self.name}: {self.id}>"
@@ -245,16 +246,15 @@ class Field(Base):
 class Template(_UndoableMixin, Base):
     __tablename__ = "templates"
 
-    id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
-    note_type_id = Column("ntid", Integer, ForeignKey("notetypes.id"), nullable=False, index=True)
-    ordinal = Column("ord", Integer, nullable=False)
+    note_type_id = Column("ntid", Integer, ForeignKey("notetypes.id"), nullable=False, index=True, primary_key=True)
+    ordinal = Column("ord", Integer, nullable=False, primary_key=True)
     config = Column(Text, nullable=False)
 
     note_type = relationship("NoteType")
 
     def __repr__(self):
-        return f"<{self.name}: {self.id}>"
+        return f"<{self.name}>"
 
 
 class Deck(_UndoableMixin, Base):
