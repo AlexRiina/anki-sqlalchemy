@@ -1,7 +1,7 @@
 import datetime
 import enum
 
-from sqlalchemy import Column, ForeignKey, Index, Integer, Text
+from sqlalchemy import func, Column, DateTime, ForeignKey, Index, Integer, Text, type_coerce
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
@@ -53,6 +53,7 @@ class ReviewType(enum.IntEnum):
     review = 1
     relearn = 2
     cram = 3
+    manual = 4
 
 
 class _UndoableMixin:
@@ -69,6 +70,10 @@ class _TimestampIdMixin:
     @hybrid_property
     def creation_time(self):
         return datetime.datetime.fromtimestamp(self.id / 1000)
+
+    @creation_time.expression  # noqa
+    def creation_time(self):
+        return type_coerce(func.datetime(self.id / 1000, 'unixepoch'), DateTime())
 
 
 class Card(_OldUndoableMixin, _TimestampIdMixin, Base):
